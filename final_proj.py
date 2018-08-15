@@ -11,11 +11,12 @@ SIZE_X=550
 SIZE_Y=550
 
 SQUARE_SIZE = 20
+catch = turtle.clone()
+catch.penup()
+catch.speed(100)
+catch.goto(0,300)
+catch.write("CATCH ME IF YOU CAN" , font=("fantasy",60,"normal"), align="center")
 
-turtle.penup()
-turtle.speed(100)
-turtle.goto(0,300)
-turtle.write("CATCH ME IF YOU CAN" , font=("fantasy",60,"normal"), align="center")
 turtle.setup(800, 800)
 
 border = turtle.clone()
@@ -30,6 +31,13 @@ border.goto(-300,-300)
 border.goto(-300, 300)
 border.goto(300,300)
 
+score = 0
+score_points = turtle.clone()
+score_points.hideturtle()
+score_points.penup()
+score_points.goto(-300,-350)
+score_points.write(score , font = ("fantasy", 24, "normal"))
+
 poacher = turtle.Turtle()
 poacher.penup()
 
@@ -41,29 +49,41 @@ tree = turtle.Turtle()
 tree.penup()
 
 cut = turtle.Turtle()
+cut.hideturtle()
 cut.penup()
+
+cow = turtle.Turtle()
+cow.hideturtle()
+cow.penup()
 
 turtle.register_shape("tree.gif")
 turtle.register_shape('poacher.gif')
 turtle.register_shape("farmer.gif")
-#turtle.register_shape('.gif')
+turtle.register_shape('cut.gif')
+turtle.register_shape("cow.gif")
 
 poacher.shape('poacher.gif')
 tree.shape('tree.gif')
 farmer.shape("farmer.gif")
-#cut.shape('.gif')
+cut.shape('cut.gif')
+cow.shape("cow.gif")
 
 tree_stamps = []
 tree_pos = []
+trees = []
 
-score = 0
+cut_stamps = []
+
+clear_stamps = []
+time_stamps = []
+
+cow_pos = []
+cow_stamps = [] 
 
 UP_EDGE = 300
 DOWN_EDGE = -300
 RIGHT_EDGE = 300
 LEFT_EDGE = -300
-
-direction_poacher = None
 
 TIME_STEP = 120
 
@@ -72,8 +92,50 @@ DOWN_POACHER = 1
 LEFT_POACHER = 2
 RIGHT_POACHER = 3
 
+direction_poacher = UP_POACHER
 poacher_pos = None
-tree_pos_list = []
+
+def make_tree():
+    min_x=-int(SIZE_X/2/SQUARE_SIZE)+1
+    max_x=int(SIZE_X/2/SQUARE_SIZE)-1
+    min_y=-int(SIZE_Y/2/SQUARE_SIZE)-1
+    max_y=int(SIZE_Y/2/SQUARE_SIZE)+1
+     
+    tree_x = random.randint(min_x,max_x)*SQUARE_SIZE
+    tree_y = random.randint(min_y,max_y)*SQUARE_SIZE
+
+    tree.goto(tree_x,tree_y)
+
+    tree_pos.append((tree_x,tree_y))
+    tree_stamp = tree.stamp()
+    tree_stamps.append(tree_stamp)
+    trees.append(tree)
+    
+for this_tree_pos in tree_pos :
+    tree.goto(tree_pos[this_tree_pos])
+    tree_stamp=tree.stamp()
+    tree_stamps.append(tree_stamp)
+
+def make_cow():
+    min_x=-int(SIZE_X/2/SQUARE_SIZE)+1
+    max_x=int(SIZE_X/2/SQUARE_SIZE)-1
+    min_y=-int(SIZE_Y/2/SQUARE_SIZE)-1
+    max_y=int(SIZE_Y/2/SQUARE_SIZE)+1
+     
+    cow_x = random.randint(min_x,max_x)*SQUARE_SIZE
+    cow_y = random.randint(min_y,max_y)*SQUARE_SIZE
+
+    cow.goto(cow_x,cow_y)
+
+    cow_pos.append((cow_x,cow_y))
+    cow_stamp = cow.stamp()
+    cow_stamps.append(cow_stamp)
+    cow_pos.append(cow)
+    
+for this_cow_pos in cow_pos :
+    cow.goto(cow_pos[this_cow_pos])
+    cow_stamp=cow.stamp()
+    cow_stamps.append(cow_stamp)
 
 def W():
     global direction_poacher
@@ -117,13 +179,15 @@ turtle.onkeypress(A , "a")
 turtle.onkeypress(D , "d")
 
 
-direction_farmer = None
+
 farmer_pos = None
 
 UP_FARMER = 0
 DOWN_FARMER = 1
 LEFT_FARMER = 2
 RIGHT_FARMER = 3
+
+direction_farmer = DOWN_FARMER
 
 def UP():
     global direction_farmer
@@ -196,7 +260,7 @@ def move_poacher():
         border.goto(0,0)
         border.pencolor("red")
         border.write("GAME OVER", font = ("arial", 57, "normal"), align = "center")
-        time.sleep(5)
+        time.sleep(3)
         quit()
     elif new_x_pos <= LEFT_EDGE:
         print("You hit the left edge! Game over!")
@@ -204,7 +268,7 @@ def move_poacher():
         border.goto(0,0)
         border.pencolor("red")
         border.write("GAME OVER", font = ("arial", 57, "normal"), align = "center")
-        time.sleep(5)
+        time.sleep(3)
         quit()
     elif new_y_pos >= UP_EDGE:
         print("You hit the up edge! Game over!")
@@ -212,7 +276,7 @@ def move_poacher():
         border.goto(0,0)
         border.pencolor("red")
         border.write("GAME OVER", font = ("arial", 57, "normal"), align = "center")
-        time.sleep(5)
+        time.sleep(3)
         quit()
     elif new_y_pos <= DOWN_EDGE:
         print("You hit the down edge! Game over!")
@@ -220,34 +284,54 @@ def move_poacher():
         border.goto(0,0)
         border.pencolor("red")
         border.write("GAME OVER", font = ("arial", 57, "normal"), align = "center")
-        time.sleep(5)
+        time.sleep(3)
         quit()
     
     global tree_stamps, tree_pos
-   
+    global score
     if poacher.pos() in tree_pos:
         tree_ind=tree_pos.index(poacher.pos()) 
-        tree.clearstamp(tree_stamps[tree_ind])               
-                                               
+        tree.clearstamp(tree_stamps[tree_ind])
+
+        cut.goto(poacher.pos())
+        cut_stamp = cut.stamp()
+        clear_stamps.append(cut_stamp)
+
+        t = time.time()
+        time_stamps.append(t)
+        
         tree_pos.pop(tree_ind) 
         a = tree_stamps.pop(tree_ind)
         tree.clearstamp(a)
-        '''
-        cut.goto(tree_ind)
-        cut.clear()
-        '''
-        
-        print("the poacher has cut the tree")
-    
-##        score1.penup()
-##        score1.goto(-50,-340)
-##        global score
-##        score += 1
-##        score1.clear()
-##        score1.write("poacher score:" + str(score), font=("Arial", 20, "normal"))
-##    
-    if len(tree_stamps) <= 7 :
+        score += 1
+        score_points.clear()
+        score_points.write(score , font = ("fantasy", 24, "normal"))
+        if score == 20:
+            score_points.pencolor("red")
+            score_points.goto(0,0)
+            score_points.write("THE POACHER WON" , font = ("fantasy", 57, "normal"), align = "center")
+            time.sleep(3)
+            quit()
+        print("The poacher has cut the tree")
+        if poacher.pos() in cow.pos():
+            score_points.pencolor("red")
+            score_points.goto(0,0)
+            score_points.write("THE POACHER HIT THE COW" , font = ("fantasy", 57, "normal"), align = "center")
+            time.sleep(3)
+            quit()
+
+    if len(time_stamps) > 0:
+        if time_stamps[0] - time.time() < -3:
+            time_stamps.pop(0)
+            cut_stamp = clear_stamps.pop(0)
+            cut.clearstamp(cut_stamp)
+             
+    if len(tree_stamps) <= 5 :
         make_tree()
+        
+    if len(cow_stamps) <= 2 :
+        make_cow()
+        
     turtle.ontimer(move_poacher,TIME_STEP)
 
 def move_farmer():
@@ -304,31 +388,15 @@ def move_farmer():
         border.write("GAME OVER", font = ("arial", 57, "normal"), align = "center")
         time.sleep(5)
         quit()
-
-    if farmer.pos() == poacher.pos():
-        quit()
-
-    turtle.ontimer(move_farmer,TIME_STEP)
-
-def make_tree():
-    min_x=-int(250/2/SQUARE_SIZE)+1
-    max_x=int(250/2/SQUARE_SIZE)-1
-    min_y=-int(250/2/SQUARE_SIZE)-1
-    max_y=int(250/2/SQUARE_SIZE)+1
-     
-    tree_x = random.randint(min_x,max_x)*SQUARE_SIZE
-    tree_y = random.randint(min_y,max_y)*SQUARE_SIZE
-
-    tree.goto(tree_x,tree_y)
-
-    tree_pos.append((tree_x,tree_y))
-    tree_stamp = tree.stamp()
-    tree_stamps.append(tree_stamp)
     
-for this_tree_pos in tree_pos :
-    tree.goto(tree_pos[this_tree_pos])
-    tree_stamp=tree.stamp()
-    tree_stamps.append(tree_stamp)
+    if farmer.pos() == poacher.pos():
+        score_points.pencolor("red")
+        score_points.goto(0,0)
+        score_points.write("THE FARMER WON" , font = ("fantasy", 57, "normal"), align = "center")
+        time.sleep(3)
+        quit()
+    
+    turtle.ontimer(move_farmer,TIME_STEP)
 
 
 move_poacher()
