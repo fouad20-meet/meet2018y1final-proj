@@ -130,7 +130,7 @@ def make_cow():
     cow_pos.append((cow_x,cow_y))
     cow_stamp = cow.stamp()
     cow_stamps.append(cow_stamp)
-    cow_pos.append(cow)
+    cow_pos.append(cow.pos())
     
 for this_cow_pos in cow_pos :
     cow.goto(cow_pos[this_cow_pos])
@@ -287,7 +287,7 @@ def move_poacher():
         time.sleep(3)
         quit()
     
-    global tree_stamps, tree_pos
+    global tree_stamps, tree_pos, cos_pos
     global score
     if poacher.pos() in tree_pos:
         tree_ind=tree_pos.index(poacher.pos()) 
@@ -313,12 +313,13 @@ def move_poacher():
             time.sleep(3)
             quit()
         print("The poacher has cut the tree")
-        if poacher.pos() in cow.pos():
-            score_points.pencolor("red")
-            score_points.goto(0,0)
-            score_points.write("THE POACHER HIT THE COW" , font = ("fantasy", 57, "normal"), align = "center")
-            time.sleep(3)
-            quit()
+        
+    if poacher.pos() in cow_pos:
+        score_points.pencolor("red")
+        score_points.goto(0,0)
+        score_points.write("THE POACHER HIT THE COW" , font = ("fantasy", 40, "normal"), align = "center")
+        time.sleep(3)
+        quit()
 
     if len(time_stamps) > 0:
         if time_stamps[0] - time.time() < -3:
