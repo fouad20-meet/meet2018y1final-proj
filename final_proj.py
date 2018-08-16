@@ -2,9 +2,10 @@ import turtle
 import random
 import time
 
+turtle.bgpic("background.gif")
+
 turtle.penup()
 turtle.hideturtle()
-turtle.speed(4)
 turtle.tracer(1,0)
 
 SIZE_X=550
@@ -13,7 +14,7 @@ SIZE_Y=550
 SQUARE_SIZE = 20
 catch = turtle.clone()
 catch.penup()
-catch.speed(100)
+catch.speed(0)
 catch.goto(0,300)
 catch.write("CATCH ME IF YOU CAN" , font=("fantasy",60,"normal"), align="center")
 
@@ -30,6 +31,8 @@ border.goto(300, -300)
 border.goto(-300,-300)
 border.goto(-300, 300)
 border.goto(300,300)
+
+points = 0
 
 score = 0
 score_points = turtle.clone()
@@ -85,7 +88,8 @@ DOWN_EDGE = -300
 RIGHT_EDGE = 300
 LEFT_EDGE = -300
 
-TIME_STEP = 120
+TIME_STEP_POACHER = 120
+TIME_STEP_FARMER = 180
 
 UP_POACHER = 0
 DOWN_POACHER = 1
@@ -233,6 +237,7 @@ turtle.onkeypress(RIGHT , "Right")
 turtle.listen()
 
 def move_poacher():
+    
     my_pos = poacher.pos()
     x_pos = my_pos[0]
     y_pos = my_pos[1]
@@ -255,39 +260,28 @@ def move_poacher():
     new_y_pos = new_pos[1]
 
     if new_x_pos >= RIGHT_EDGE:
-        print("You hit the right edge! Game over!")
-        border.penup()
-        border.goto(0,0)
-        border.pencolor("red")
-        border.write("GAME OVER", font = ("arial", 57, "normal"), align = "center")
-        time.sleep(3)
-        quit()
+        print("You teleported!")
+        poacher.hideturtle()
+        poacher.goto(new_x_pos-600,new_y_pos)
+        poacher.showturtle()
+        
     elif new_x_pos <= LEFT_EDGE:
-        print("You hit the left edge! Game over!")
-        border.penup()
-        border.goto(0,0)
-        border.pencolor("red")
-        border.write("GAME OVER", font = ("arial", 57, "normal"), align = "center")
-        time.sleep(3)
-        quit()
+        print("You teleported!")
+        poacher.hideturtle()
+        poacher.goto(new_x_pos+600,new_y_pos)
+        poacher.showturtle()
     elif new_y_pos >= UP_EDGE:
-        print("You hit the up edge! Game over!")
-        border.penup()
-        border.goto(0,0)
-        border.pencolor("red")
-        border.write("GAME OVER", font = ("arial", 57, "normal"), align = "center")
-        time.sleep(3)
-        quit()
+        print("You teleported!")
+        poacher.hideturtle()
+        poacher.goto(new_x_pos,new_y_pos - 600)
+        poacher.showturtle()
     elif new_y_pos <= DOWN_EDGE:
-        print("You hit the down edge! Game over!")
-        border.penup()
-        border.goto(0,0)
-        border.pencolor("red")
-        border.write("GAME OVER", font = ("arial", 57, "normal"), align = "center")
-        time.sleep(3)
-        quit()
+        print("You teleported!")
+        poacher.hideturtle()
+        poacher.goto(new_x_pos,new_y_pos+600)
+        poacher.showturtle()
     
-    global tree_stamps, tree_pos, cos_pos
+    global tree_stamps, tree_pos, cow_pos
     global score
     if poacher.pos() in tree_pos:
         tree_ind=tree_pos.index(poacher.pos()) 
@@ -333,7 +327,7 @@ def move_poacher():
     if len(cow_stamps) <= 2 :
         make_cow()
         
-    turtle.ontimer(move_poacher,TIME_STEP)
+    turtle.ontimer(move_poacher,TIME_STEP_POACHER)
 
 def move_farmer():
     my_pos = farmer.pos()
@@ -354,6 +348,7 @@ def move_farmer():
          print("You moved up!")
 
     new_pos = farmer.pos()
+    print(new_pos)
     new_x_pos = new_pos[0]
     new_y_pos = new_pos[1]
 
@@ -362,7 +357,7 @@ def move_farmer():
         border.penup()
         border.goto(0,0)
         border.pencolor("red")
-        border.write("GAME OVER", font = ("arial", 57, "normal"), align = "center")
+        border.write("THE FARMER HIT THE EDGE", font = ("arial", 33, "normal"), align = "center")
         time.sleep(5)
         quit()
     elif new_x_pos <= LEFT_EDGE:
@@ -370,7 +365,7 @@ def move_farmer():
         border.penup()
         border.goto(0,0)
         border.pencolor("red")
-        border.write("GAME OVER", font = ("arial", 57, "normal"), align = "center")
+        border.write("THE FARMER HIT THE EDGE", font = ("arial", 35, "normal"), align = "center")
         time.sleep(5)
         quit()
     elif new_y_pos >= UP_EDGE:
@@ -378,7 +373,7 @@ def move_farmer():
         border.penup()
         border.goto(0,0)
         border.pencolor("red")
-        border.write("GAME OVER", font = ("arial", 57, "normal"), align = "center")
+        border.write("THE FARMER HIT THE EDGE", font = ("arial", 35, "normal"), align = "center")
         time.sleep(5)
         quit()
     elif new_y_pos <= DOWN_EDGE:
@@ -386,18 +381,25 @@ def move_farmer():
         border.penup()
         border.goto(0,0)
         border.pencolor("red")
-        border.write("GAME OVER", font = ("arial", 57, "normal"), align = "center")
+        border.write("THE FARMER HIT THE EDGE", font = ("arial", 35, "normal"), align = "center")
         time.sleep(5)
         quit()
-    
-    if farmer.pos() == poacher.pos():
+    if abs(farmer.pos()[0] - poacher.pos()[0]) < 25 and abs(farmer.pos()[1] - poacher.pos()[1]) < 25:
         score_points.pencolor("red")
         score_points.goto(0,0)
-        score_points.write("THE FARMER WON" , font = ("fantasy", 57, "normal"), align = "center")
+        score_points.write("THE FARMER WON" , font = ("fantasy", 35, "normal"), align = "center")
         time.sleep(3)
         quit()
-    
-    turtle.ontimer(move_farmer,TIME_STEP)
+    global TIME_STEP_FARMER
+    global score
+    global points
+    if score == points + 5:
+        TIME_STEP_FARMER = TIME_STEP_FARMER - 20
+        points = points + 5
+        
+        
+            
+    turtle.ontimer(move_farmer,TIME_STEP_FARMER)
 
 
 move_poacher()
